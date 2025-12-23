@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",    // Optional: Specifies where to put compiled .js files (e.g., in a 'dist' folder)
+    // "rootDir": "/",    // Optional: Specifies where your .ts source files are (e.g., in a 'src' folder)
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,// Possibly configured with "noEmit": true in tsconfig.json (this option tells tsc to check types but not produce any output files, though this is less likely if you used the configurations we discussed).
+    "allowImportingTsExtensions": true,
+    // "typeRoots": ["./node_modules/@types", "./node_modules/@matterport/sdk/dist/types/mp-sdk.d.ts","./node_modules/@matterport/sdk/dist/mp-sdk.d.js"], // if you put it in a 'types' folder
+    "target": "esnext",    
+    "lib": ["esnext", "dom"],
+    "module": "node16",
+    "moduleResolution": "node16"
+  },
+  "include": ["*"],
+  "exclude": ["node_modules"]
+}

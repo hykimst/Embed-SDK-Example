@@ -1,0 +1,25 @@
+{
+    "name": "embed-sdk-showcase-sdk-tutorial",
+    "version": "0.0.0",
+    "main": "index.ts",
+    "license": "MIT",
+    "engines": {
+        "node": ">=0.10.3 <15"
+    },
+    "scripts": {
+        "start": "webpack-dev-server"
+    },
+    "devDependencies": {
+        "@matterport/sdk": "^*",
+        "@types/three": "^0.171.0",
+        "three": "^0.171.0",
+        "typescript": "^5.8.3",
+        "ts-loader": "^9.5.2",
+        "webpack-dev-server": "^5.2.1",
+        "webpack": "^5.99.5",
+        "webpack-cli": "^6.0.1",
+        "clean-webpack-plugin": "^4.0.0",
+        "copy-webpack-plugin": "^13.0.0",
+        "html-webpack-plugin": "^5.6.3"
+    }
+}
