@@ -21,6 +21,7 @@ module.exports = {
     })
   ],
   module: {
+    exprContextCritical: false,
     rules: [
       {
         test: /\.ts?$/,
