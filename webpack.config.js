@@ -1,42 +1,46 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
+const path = require("path");
+const Dotenv = require('dotenv-webpack')
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
+
 
 module.exports = {
-  mode: 'development',
+  mode: "development",
   entry: {
-    app: './index.ts',
+    app: "./index.ts",
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   resolve: {
-    extensions: ['.js', '.ts']
+    extensions: [".js", ".ts"],
   },
   plugins: [
+    new Dotenv(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Development',
-      template: 'index.html',
-      inject: true
-    })
+      title: "Development",
+      template: "index.html",
+      inject: true,
+    }),
   ],
   module: {
+    exprContextCritical: false,
     rules: [
       {
         test: /\.ts?$/,
-        loader: 'ts-loader',
+        loader: "ts-loader",
         exclude: [/node_modules/, /\.d\.ts$/],
         options: {
-          transpileOnly: true
-        }
+          transpileOnly: true,
+        },
       },
-    ]
+    ],
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // Important for serving assets correctly
+    path: path.resolve(__dirname, "dist"),
+    publicPath: "/",
   },
   devServer: {
-    port: 8080
-  }
+    port: 8080,
+  },
 };

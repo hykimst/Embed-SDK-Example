@@ -1,4 +1,4 @@
-// 25.8.3_webgl-988-gb72c7ef55c
+// 26.1.2_webgl-149-gfdf17a4524
 export type Vector2 = {
 	x: number;
 	y: number;
@@ -328,20 +328,18 @@ export declare namespace App {
 		 * The times are filled in after the phase has passed.
 		 * ```
 		 * {
-		 *    phaseTimes: {
-		 *      'appphase.uninitialized': 1570084156590,
-		 *      'appphase.waiting': 0,
-		 *      'appphase.loading': 0,
-		 *      'appphase.starting': 0,
-		 *      'appphase.playing': 0,
-		 *      'appphase.error': 0,
-		 *    }
+		 *   phaseTimes: {
+		 *     [Phase.UNINITIALIZED]: 1570084156590,
+		 *     [Phase.WAITING]: 0,
+		 *     [Phase.LOADING]: 0,
+		 *     [Phase.STARTING]: 0,
+		 *     [Phase.PLAYING]: 0,
+		 *     [Phase.ERROR]: 0,
+		 *   }
 		 * }
 		 * ```
 		 */
-		phaseTimes: {
-			[phase: string]: number;
-		};
+		phaseTimes: Record<Phase, number>;
 	};
 	/**
 	 *  App.Locale Module for Internal Use.
@@ -368,22 +366,33 @@ export declare namespace App {
 		/**
 		 * Returns a translation function to use with registered strings.
 		 *
+		 * The `options` parameter can be:
+		 * - A `number` to determine whether the singular or plural form of the phrase should be used
+		 * - A `Record<string, unknown>` containing interpolation keys and values to substitute into the translated string
+		 *
 		 * ```
 		 * const t = mpSdk.App.Locale.getT();
+		 *
+		 * // Simple translation
 		 * let string = t('EXPLORE_3D_SPACE');
 		 * console.log(string);
-		 * ```
-		 * output (if locale is 'es'):
-		 * > Explorar el espacio 3D
+		 * // output (if locale is 'es'): Explorar el espacio 3D
 		 *
-		 * @return t(key: string, options?: number): string
+		 * // Pluralization: pass a number to select singular/plural form
+		 * let countString = t('ITEM_COUNT', 5);
+		 *
+		 * // Interpolation: pass an object with keys matching placeholders in the phrase
+		 * let interpolatedString = t('WELCOME_USER', { name: 'Alice' });
+		 * ```
+		 *
+		 * @return A function `t(key: string, options?: number | Record<string, unknown>): string`
 		 *
 		 * @hidden
 		 * @internal
 		 * @experimental
 		 *
 		 */
-		function getT(): Promise<(key: string, options?: number) => string>;
+		function getT(): Promise<(key: string, options?: number | Record<string, unknown>) => string>;
 	}
 }
 export interface App {
@@ -443,6 +452,11 @@ export interface App {
 	 * ```
 	 */
 	state: IObservable<App.State>;
+	/**
+	 * @hidden
+	 * @internal
+	 * @experimental
+	 */
 	Locale: {
 		/**
 		 * Return the language code currently used by Showcase.
@@ -460,24 +474,34 @@ export interface App {
 		getLanguageCode(): Promise<string>;
 		/**
 		 * Returns a translation function to use with registered strings.
-		 * Options can be a number to show plurality.
+		 *
+		 * The `options` parameter can be:
+		 * - A `number` to determine whether the singular or plural form of the phrase should be used
+		 * - A `Record<string, unknown>` containing interpolation keys and values to substitute into the translated string
 		 *
 		 * ```
 		 * const t = mpSdk.App.Locale.getT();
+		 *
+		 * // Simple translation
 		 * let string = t('EXPLORE_3D_SPACE');
 		 * console.log(string);
-		 * ```
-		 * output (if locale is 'es'):
-		 * > Explorar el espacio 3D
+		 * // output (if locale is 'es'): Explorar el espacio 3D
 		 *
-		 * @return t(key: string, options?: unknown): string
+		 * // Pluralization: pass a number to select singular/plural form
+		 * let countString = t('ITEM_COUNT', 5);
+		 *
+		 * // Interpolation: pass an object with keys matching placeholders in the phrase
+		 * let interpolatedString = t('WELCOME_USER', { name: 'Alice' });
+		 * ```
+		 *
+		 * @return A function `t(key: string, options?: number | Record<string, unknown>): string`
 		 *
 		 * @hidden
 		 * @internal
 		 * @experimental
 		 *
 		 */
-		getT(): Promise<(key: string, options?: number) => string>;
+		getT(): Promise<(key: string, options?: number | Record<string, unknown>) => string>;
 	};
 	/**
    * @hidden
@@ -517,121 +541,8 @@ export interface App {
 	 */
 	track(eventType: string, options?: App.TrackOptionsT): void;
 }
-export declare namespace Asset {
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	type VrColorplanMetadata = {
-		height: number;
-		imageOriginX: number;
-		imageOriginY: number;
-		resolutionPpm: number;
-		width: number;
-	};
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	type VrColorplanData = {
-		data: VrColorplanMetadata;
-		imageDataUrls: string[];
-	};
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	interface IAttachment {
-		id: string;
-		created: Date;
-		mediaType: MediaType;
-		category: AttachmentCategory;
-		parentId?: string;
-		parentType: ParentType;
-		filename?: string;
-		bytes?: number;
-		mimeType?: string;
-		/** source url - prefer `url.get()` over this. */
-		src: string;
-		/** expiring url */
-		url: ExpiringResource<string>;
-		/** expiring thumbnail url */
-		thumbnailUrl?: ExpiringResource<string>;
-		height: number;
-		width: number;
-	}
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	enum MediaType {
-		IMAGE = "image",
-		PDF = "pdf",
-		VIDEO = "video",
-		RICH = "rich",
-		ZIP = "zip",
-		TEXT = "text",
-		AUDIO = "audio",
-		MODEL = "model",
-		APPLICATION = "application"
-	}
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	enum AttachmentCategory {
-		EXTERNAL = "external",
-		UPLOAD = "upload",
-		SANDBOX = "sandbox"
-	}
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	enum ParentType {
-		COMMENT = "comment",
-		MATTERTAG = "mattertag"
-	}
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	type ExpiringResource<T> = {
-		get(): Promise<T>;
-		onStale?: () => Promise<void>;
-		validUntil: Date | null;
-		getCurrentValue(): T;
-	};
-}
+export declare namespace Asset { }
 export interface Asset {
-	/**
-	 * Get colorplan data URLs and metadata. The optional sid has one caveat, it assumes that the floor count of the other space is the same as the current space.
-	 * See https://matterport.atlassian.net/browse/JSSDK-2160
-	 *
-	 * ```
-	 * const { data, imageDataUrls } = await mpSdk.Asset.getVrColorplans();
-	 * ```
-	 *
-	 * @param sid An optional string space sid. Used to access the colorplans of other spaces. Omitting this value defaults to the current space.
-	 *
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	getVrColorplans(): Promise<Asset.VrColorplanData>;
-	/**
-   * @hidden
-   * @internal
-   * @experimental
-   */
-	getVrColorplans(sid: string): Promise<Asset.VrColorplanData>;
 	/**
 	 * Register a texture to use with subsequent calls like [[Tag.editIcon]].
 	 *
@@ -649,30 +560,6 @@ export interface Asset {
 	 * @introduced 3.1.68.12-7-g858688944a
 	 */
 	registerTexture(id: string, iconSrc: string): Promise<void>;
-	/**
-	 * Gets an asset by specified ID. Throws an error if no
-	 * asset with the desired ID exists.
-	 * ```
-	 * mpSdk.Asset.getAssetById('your-asset-id')
-	 *   .then(async function(asset){
-	 *     console.log('Asset URL is', await asset.url.get());
-	 *   });
-	 * ```
-	 * @return A promise that resolves with the desired asset.
-	 *
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	getAssetById(id: string): Promise<Asset.IAttachment>;
-	/**
-	 * Refresh assets from server, ensuring that all attachments are up to date.
-	 *
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	refreshAssets(): Promise<void>;
 }
 export declare namespace Mode {
 	enum Mode {
@@ -680,7 +567,8 @@ export declare namespace Mode {
 		OUTSIDE = "mode.outside",
 		DOLLHOUSE = "mode.dollhouse",
 		FLOORPLAN = "mode.floorplan",
-		TRANSITIONING = "mode.transitioning"
+		TRANSITIONING = "mode.transitioning",
+		EXTERIOR = "mode.exterior"
 	}
 	enum Event {
 		/** @event */
@@ -692,15 +580,23 @@ export declare namespace Mode {
 		from: Mode | null;
 		to: Mode | null;
 	};
-	enum TransitionType {
-		INSTANT = "transition.instant",
-		FLY = "transition.fly",
-		FADEOUT = "transition.fade"
-	}
+	/**
+	 * @enum
+	 *
+	 * @deprecated This enum is maintained for backward compatibility.
+	 * @see [[Camera.TransitionType]]
+	 *
+	 * @option FLY - Smoothly interpolate the camera to the target position.
+	 * @option FADEOUT - Fade out to black before moving the camera.
+	 * @option INSTANT - Instantly move the camera to the target position.
+	 *
+	 * @links Other Enums in this namespace: [[Mode.Event]], [[Mode.Mode]]
+	 */
+	export import TransitionType = Camera.TransitionType;
 	type MoveToModeOptions = {
 		rotation?: Rotation;
 		position?: Vector3;
-		transition?: TransitionType;
+		transition?: Camera.TransitionType;
 		zoom?: number;
 	};
 	type CurrentViewmodeData = Mode | null;
@@ -708,7 +604,7 @@ export declare namespace Mode {
 export interface Mode {
 	Mode: typeof Mode.Mode;
 	Event: typeof Mode.Event;
-	TransitionType: typeof Mode.TransitionType;
+	TransitionType: typeof Camera.TransitionType;
 	/**
 	 * The current view mode.
 	 *
@@ -731,7 +627,7 @@ export interface Mode {
 	 * const mode = mpSdk.Mode.Mode.FLOORPLAN;
 	 * const position = {x: 0, y: 0, z: 0};
 	 * const rotation = {x: -90, y: 0};
-	 * const transition = mpSdk.Mode.TransitionType.FLY;
+	 * const transition = mpSdk.Camera.TransitionType.FLY;
 	 * const zoom = 5;
 	 *
 	 * mpSdk.Mode.moveTo(mode, {
@@ -757,8 +653,8 @@ export interface Mode {
 	 *   changing X changes the 'roll' of the view, similar to hitting the LEFT/RIGHT arrow keys in Showcase
 	 *   floorplan view, changing the Y value has no analog in showcase, but changes the 'tilt' of the view.
 	 *
-	 * @param The mode.
-	 * @param Options object, containing optional position, rotation, transition type
+	 * @param mode The mode.
+	 * @param options Options object, containing optional position, rotation, transition type
 	 * @return A promise that resolves with the new mode once the mode has transitioned.
 	 */
 	moveTo(mode: Mode.Mode, options?: Mode.MoveToModeOptions): Promise<Mode.Mode>;
@@ -811,10 +707,28 @@ export declare namespace Camera {
 		 */
 		level: number;
 	};
+	/**
+	 * Transition types for camera movements. This is the canonical transition type enum.
+	 * Used for [[Mode.moveTo]], [[Sweep.moveTo]], [[Mattertag.navigateToTag]], and other camera movement methods.
+	 * Note: not all values are supported, refer to per-method documentation for details.
+	 */
+	enum TransitionType {
+		/** Instant transition */
+		INSTANT = "transition.instant",
+		/** Fly transition */
+		FLY = "transition.fly",
+		/** Fade to black transition */
+		FADEOUT = "transition.fade",
+		/** @experimental Move with fade transition */
+		MOVEFADE = "transition.movefade",
+		/** @experimental Orbit transition */
+		ORBIT = "transition.orbit"
+	}
 }
 export interface Camera {
 	Event: typeof Camera.Event;
 	Direction: typeof Camera.Direction;
+	TransitionType: typeof Camera.TransitionType;
 	/**
 	 * Returns the current state of camera.
 	 * ```
@@ -1188,7 +1102,7 @@ export declare namespace Floor {
 		 * const mapping = await mpSdk.Floor.Conversion.createIdMap();
 		 * ```
 		 *
-		 * @param invert?: boolean - if passed, return map of v1->v2 instead
+		 * @param invert If passed, return map of v1->v2 instead
 		 */
 		function createIdMap(invert?: boolean): Promise<Dictionary<string>>;
 	}
@@ -1277,7 +1191,7 @@ export interface Floor {
 	 *   });
 	 * ```
 	 *
-	 * @param index: The destination floor index
+	 * @param index The destination floor index
 	 * @return The destination floor index.
 	 */
 	moveTo(index: number): Promise<number>;
@@ -1348,6 +1262,27 @@ export declare namespace Graph {
 		 */
 		readonly edgesIn: IterableIterator<Edge<T>>;
 		/**
+		 * The nubmer of edges that have this vertex as its destination endpoint.
+		 *
+		 * ```typescript
+		 * const vertex = graph.vertex('a');
+		 * console.log(`vertex "${vertex.id}" has ${vertex.edgesInCount} edges out");
+		 * ```
+		 */
+		readonly edgesInCount: number;
+		/**
+		 * Find an edge into this vertex.
+		 *
+		 * ```ts
+		 * const vertex = graph.vertex('a');
+		 * // find an edge into 'a' and out from 'b'
+		 * vertex.findEdgeIn(edge => edge.src.id === 'b');
+		 * ```
+		 * @param predicate The callback to run against each inward edge until one is found (by returning true.)
+		 * @param thisArg The "this" argument to use in `predicate`
+		 */
+		findEdgeIn(predicate: (edgeIn: Edge<T>) => boolean, thisArg?: any): Edge<T> | undefined;
+		/**
 		 * An iterable of all edges that have this vertex as its source endpoint.
 		 *
 		 * ```typescript
@@ -1358,6 +1293,28 @@ export declare namespace Graph {
 		 * ```
 		 */
 		readonly edgesOut: IterableIterator<Edge<T>>;
+		/**
+		 * The nubmer of edges that have this vertex as its source endpoint.
+		 *
+		 * ```typescript
+		 * const vertex = graph.vertex('a');
+		 * console.log(`vertex "${vertex.id}" has ${vertex.edgeOutCount} edges out");
+		 * ```
+		 */
+		readonly edgesOutCount: number;
+		/**
+		 * Find an edge out of this vertex.
+		 *
+		 * ```ts
+		 * const vertex = graph.vertex('a');
+		 * // find an edge out from 'a' and into 'b'
+		 * vertex.findEdgeIn(edge => edge.src.id === 'b');
+		 * ```
+		 *
+		 * @param predicate The callback to run against each outward edge until one is found (by returning true.)
+		 * @param thisArg The "this" argument to use in `predicate`
+		 */
+		findEdgeOut(predicate: (edgeOut: Edge<T>) => boolean, thisArg?: any): Edge<T> | undefined;
 		/**
 		 * An iterable of all vertices that can be traversed to from this vertex.
 		 *
@@ -1470,6 +1427,30 @@ export declare namespace Graph {
 		 */
 		vertex(id: string): Vertex<T> | undefined;
 		/**
+		 * Find a vertex of this graph.
+		 *
+		 * ```ts
+		 * // find a highly connected vertex with more than 10 edges
+		 * graph.findVertex(vertex => (vertex.edgesOutCount + vertex.edgesInCount) > 10);
+		 * ```
+		 *
+		 * @param predicate The callback to run against each vertex until one is found (by returning true.)
+		 * @param thisArg The "this" argument to use in `predicate`
+		 */
+		findVertex(predicate: (vertex: Vertex<T>) => boolean, thisArg?: any): Vertex<T> | undefined;
+		/**
+		 * Filter the vertices of this graph to ones that meet the condition specified.
+		 *
+		 * ```ts
+		 * // find all vertices that are islands (have no edges in nor out)
+		 * graph.filterVertices(verex => (vertex.edgesOutCount + vertex.edgesInCount) > 10);
+		 * ```
+		 *
+		 * @param predicate The callback to run against each vertex to determine whether to include it in the returned array.
+		 * @param thisArg The "this" argument to use in `predicate`
+		 */
+		filterVertices(predicate: (vertex: Vertex<T>) => boolean, thisArg?: any): Array<Vertex<T>>;
+		/**
 		 * Remove a vertex or a set of vertices from the graph.
 		 *
 		 * ```typescript
@@ -1511,11 +1492,9 @@ export declare namespace Graph {
 		 *   { src: a, dst: b, weight: 10 },
 		 * );
 		 * ```
-		 * @param src The source vertex.
-		 * @param dst The destination vertex.
-		 * @param weight The weight assciated with the path from `src` to `dst`. Defaults to 0.
-		 * @throws If `src` or `dst` is not in the graph.
-		 * @throws If `weight` is negative or not a number.
+		 * @param edgeDescs One or more [[EdgeDescriptor]]s describing the edges to set.
+		 * @throws If an edgeDesc's `src` or `dst` vertex is not in the graph.
+		 * @throws If an edgeDesc's `weight` is negative or not a number.
 		 */
 		setEdge(...edgeDescs: Array<EdgeDescriptor<T>>): void;
 		/**
@@ -1584,6 +1563,16 @@ export declare namespace Graph {
 		 */
 		dispose(): void;
 		/**
+		 * Remove all vertices and edges from the graph.
+		 *
+		 * ```typescript
+		 * graph.clear();
+		 * // graph.vertexCount === 0
+		 * // graph.edgeCount === 0
+		 * ```
+		 */
+		clear(): void;
+		/**
 		 * Subscribe to vertex changes.
 		 *
 		 * After this graph's vertices have been updated using [[addVertex]] or [[removeVertex]],
@@ -1598,7 +1587,7 @@ export declare namespace Graph {
 		 * ```
 		 * @param observer
 		 */
-		onVerticesChanged(observer: IObserver<void>): ISubscription;
+		onVerticesChanged(observer: IObserver<Graph.IDirectedGraph<T>>): ISubscription;
 		/**
 		 * Subscribe to edge changes.
 		 *
@@ -1614,7 +1603,7 @@ export declare namespace Graph {
 		 * ```
 		 * @param observer
 		 */
-		onEdgesChanged(observer: IObserver<void>): ISubscription;
+		onEdgesChanged(observer: IObserver<Graph.IDirectedGraph<T>>): ISubscription;
 		/**
 		 * Trigger any attached observers if there were changes to this graph.
 		 * If there are no changes to the graph, this is a no-op and no callbacks will be triggered.
@@ -1740,7 +1729,7 @@ export interface Graph {
 	/**
 	 * Create an empty graph data structure.
 	 *
-	 * ```
+	 * ```ts
 	 * const graph = mpSdk.Graph.createDirectedGraph();
 	 * ```
 	 * @param onDispose An optional callback to be called when [[IDirectedGraph.dispose]] is called
@@ -1777,6 +1766,57 @@ export interface Graph {
 	 * @introduced 3.1.55.2-34-ga9934ccd93
 	 */
 	createAStarRunner<T>(graph: Graph.IDirectedGraph<T>, start: Graph.Vertex<T>, end: Graph.Vertex<T>, options?: Partial<Graph.SearchOptions<T>>): Graph.IAStarRunner<T>;
+	/**
+	 * Clone a graph, creating new vertices and edges.
+	 * Doesnt clone any of the vertices' `.data`.
+	 *
+	 * ```ts
+	 * const graph = mpSdk.Graph.createDirectedGraph();
+	 * // ... setup graph vertices and edges
+	 * const clone = sdk.Graph.cloneGraph(graph);
+	 * ```
+	 *
+	 * @param graph
+	 * @introduced 25.6.1
+	 */
+	cloneGraph<T>(graph: Graph.IDirectedGraph<T>): Graph.IDirectedGraph<T>;
+	/**
+	 * Find a cycle in a graph.
+	 *
+	 * ```ts
+	 * const graph = mpSdk.Graph.createDirectedGraph();
+	 * // assuming graph has edges A -> B, B -> C, C -> D, D -> B
+	 * // should find the cycle [B, C, D]
+	 * const cycle = sdk.Graph.findCyle(graph);
+	 * ```
+	 *
+	 * @param graph
+	 * @returns an Iterable of vertices that represent a found cycle or `[]` if none were found
+	 *
+	 * @embed
+	 * @bundle
+	 * @introduced 25.6.1
+	 */
+	findCycle<T>(graph: Graph.IDirectedGraph<T>): Iterable<Graph.Vertex<T>>;
+	/**
+	 * Find multiple cycles in a graph.
+	 * Note: If a vertex is in multiple cycles, only one will be reported.
+	 *
+	 * ```ts
+	 * const graph = mpSdk.Graph.createDirectedGraph();
+	 * // assuming graph has edges A -> B, B -> C, C -> A, D -> E, E -> D
+	 * // should find cycles [A, B, C], and [D, E]
+	 * const cycle = sdk.Graph.findCyle(graph);
+	 * ```
+	 *
+	 * @param graph
+	 * @returns an iterbale of iterables (like an array of arrays) of vertices
+	 *
+	 * @embed
+	 * @bundle
+	 * @introduced 25.6.1
+	 */
+	findCycles<T>(graph: Graph.IDirectedGraph<T>): Iterable<Iterable<Graph.Vertex<T>>>;
 }
 export declare namespace Label {
 	type Label = {
@@ -1964,8 +2004,8 @@ export interface Link {
 	 * sdk.Link.setNavigationLinkPolicy(sdk.Link.OpenPolicy.DEFAULT);
 	 * ```
 	 *
-	 * @param policy
-	 * @param options`
+	 * @param policy The open policy to apply
+	 * @param options Additional options for the policy
 	 *
 	 * @embed
 	 * @bundle 3.1.60.12-32-g4572017c98
@@ -2062,11 +2102,19 @@ export declare namespace Mattertag {
 			sequence: number;
 		};
 	};
-	enum Transition {
-		INSTANT = "transition.instant",
-		FLY = "transition.fly",
-		FADEOUT = "transition.fade"
-	}
+	/**
+	 * @enum
+	 *
+	 * @deprecated This enum is maintained for backward compatibility.
+	 * @see [[Camera.TransitionType]]
+	 *
+	 * @option FLY - Smoothly interpolate the camera to the target position.
+	 * @option FADEOUT - Fade out to black before moving the camera.
+	 * @option INSTANT - Instantly move the camera to the target position.
+	 *
+	 * @links Other Enums: [[Mattertag.DescriptionChunkType]], [[Mattertag.LinkType]], [[Mattertag.Event]], [[Mattertag.MediaType]]
+	 */
+	export import Transition = Camera.TransitionType;
 	interface DescriptionChunk {
 		text?: string;
 		link?: Link;
@@ -2188,7 +2236,7 @@ export declare namespace Mattertag {
 	}
 }
 export interface Mattertag {
-	Transition: typeof Mattertag.Transition;
+	Transition: typeof Camera.TransitionType;
 	LinkType: typeof Mattertag.LinkType;
 	DescriptionChunkType: typeof Mattertag.DescriptionChunkType;
 	Event: typeof Mattertag.Event;
@@ -2209,7 +2257,7 @@ export interface Mattertag {
 	 * This function navigates to the Mattertag disc with the provided sid, opening the billboard on arrival.
 	 *
 	 * ```
-	 * mpSdk.Mattertag.navigateToTag(sid, mpSdk.Mattertag.Transition.FLY);
+	 * mpSdk.Mattertag.navigateToTag(sid, mpSdk.Camera.Transition.FLY);
 	 * ```
 	 *
 	 * @param tagSid The sid of the Mattertag to navigate to
@@ -2287,7 +2335,7 @@ export interface Mattertag {
 	 * Edit the stem of a Mattertag
 	 *
 	 * @param tagSid The sid of the Mattertag to edit
-	 * @param stemOptions What to change about the Mattertag's stem - can include stemHeight and stemVisible
+	 * @param options What to change about the Mattertag's stem - can include stemHeight and stemVisible
 	 * @introduced 3.1.70.10-0-ge9cb83b28c
 	 *
 	 * @deprecated Use [[Tag.editStem]] instead
@@ -2539,11 +2587,19 @@ export declare namespace Sweep {
 		ENTER = "sweep.enter",
 		EXIT = "sweep.exit"
 	}
-	enum Transition {
-		INSTANT = "transition.instant",
-		FLY = "transition.fly",
-		FADEOUT = "transition.fade"
-	}
+	/**
+	 * @enum
+	 *
+	 * @deprecated This enum is maintained for backward compatibility.
+	 * @see [[Camera.TransitionType]]
+	 *
+	 * @option FLY - Smoothly interpolate the camera to the target position.
+	 * @option FADEOUT - Fade out to black before moving the camera.
+	 * @option INSTANT - Instantly move the camera to the target position.
+	 *
+	 * @links Other Enums in this namespace: [[Sweep.Alignment]], [[Sweep.Placement]], [[Sweep.Event]]
+	 */
+	export import Transition = Camera.TransitionType;
 	enum Alignment {
 		ALIGNED = "aligned",
 		UNALIGNED = "unaligned"
@@ -2563,7 +2619,7 @@ export declare namespace Sweep {
 		 * const mapping = await mpSdk.Sweep.Conversion.createIdMap();
 		 * ```
 		 *
-		 * @param invert?: boolean - if passed, return map of v1->v2 instead
+		 * @param invert If passed, return map of v1->v2 instead
 		 */
 		function createIdMap(invert?: boolean): Promise<Dictionary<string>>;
 		/**
@@ -2668,9 +2724,10 @@ export interface Sweep {
 	 * Move to a sweep.
 	 *
 	 *```
-	 * const sweepId = '1';
+	 *
+	 * const sweepId: string; // Acquired through a previous call to Sweep.data, Sweep.current, etc.
 	 * const rotation = { x: 30, y: -45 };
-	 * const transition = mpSdk.Sweep.Transition.INSTANT;
+	 * const transition = mpSdk.Camera.Transition.INSTANT;
 	 * const transitionTime = 2000; // in milliseconds
 	 *
 	 * mpSdk.Sweep.moveTo(sweepId, {
@@ -2687,8 +2744,8 @@ export interface Sweep {
 	 *   });
 	 * ```
 	 *
-	 * @param The destination sweep.
-	 * @param Options.
+	 * @param sweep The destination sweep.
+	 * @param options Options for the movement.
 	 * @returns A promise that will return the destination sweep.
 	 */
 	moveTo(sweep: string, options: Sweep.MoveToOptions): Promise<string>;
@@ -2728,8 +2785,8 @@ export interface Sweep {
 	 * Sweep.addNeighbors("hn7etcuyffbmqkyp5e43axa0b", ["zr7ns1smp51zibx4s239di7wb"]);
 	 * ```
 	 *
-	 * @param sweepId: string - Sweep ID
-	 * @param toAdd: string[] - List of Sweep IDs to connect
+	 * @param sweepId Sweep ID
+	 * @param toAdd List of Sweep IDs to connect
 	 * @returns A promise to a list of all current neighbor IDs (v2)
 	 */
 	addNeighbors(sweepId: string, toAdd: string[]): Promise<string[]>;
@@ -2744,8 +2801,8 @@ export interface Sweep {
 	 * Sweep.removeNeighbors("hn7etcuyffbmqkyp5e43axa0b", ["zr7ns1smp51zibx4s239di7wb"]);
 	 * ```
 	 *
-	 * @param sweepId: string - Sweep ID
-	 * @param toRemove: string[] - List of Sweep IDs to disconnect
+	 * @param sweepId Sweep ID
+	 * @param toRemove List of Sweep IDs to disconnect
 	 * @returns A promise to a list of all current neighbor IDs (v2)
 	 */
 	removeNeighbors(sweepId: string, toRemove: string[]): Promise<string[]>;
@@ -3137,7 +3194,7 @@ export declare namespace Room {
 		 * const mapping = await mpSdk.Room.Conversion.createIdMap();
 		 * ```
 		 *
-		 * @param invert?: boolean - if passed, return map of v1->v2 instead
+		 * @param invert If passed, return map of v1->v2 instead
 		 */
 		function createIdMap(invert?: boolean): Promise<Dictionary<string>>;
 	}
@@ -3570,27 +3627,6 @@ export declare namespace Tag {
 		stemHeight: number;
 		stemVisible: boolean;
 	};
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	type SaveToLayerOptions = {
-		progress?: (percentComplete: number) => void;
-		/** An array of tags that should be updated */
-		tagsToUpdate?: string[];
-		/** An array of tags that should be skipped */
-		tagsToIgnore?: string[];
-	};
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	type ImportTagsOptions = {
-		progress?: (percentComplete: number) => void;
-		allowedLayers?: string[];
-	};
 	type EditableProperties = {
 		label: string;
 		description: string;
@@ -3697,8 +3733,8 @@ export interface Tag {
 	 * mpSdk.Tag.attach(tagId, attachmentId[0], attachmentId[1]);
 	 * ```
 	 *
-	 * @param tagId
-	 * @param attachmentId
+	 * @param tagId The id of the Tag to attach to
+	 * @param attachmentIds The ids of the Attachments to attach
 	 * @return A promise that resolves when the Attachment is added to the Tag
 	 *
 	 * @embed
@@ -3706,38 +3742,6 @@ export interface Tag {
 	 * @introduced 3.1.68.12-7-g858688944a
 	 */
 	attach(tagId: string, ...attachmentIds: string[]): Promise<void>;
-	/**
-	 * Read and create transient tags from another space.
-	 *
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 *
-	 * @param sid external space id containg tags
-	 * @param options
-	 */
-	importTags(spaceSid: string, options: Partial<Tag.ImportTagsOptions>): Promise<string[]>;
-	/**
-	 * Moves all transient tags into a persistent layer. Tag sids are not preserved.
-	 *
-	 * @return The list of newly created tags.
-	 *
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 *
-	 * @param options
-	 */
-	saveToLayer(options: Partial<Tag.SaveToLayerOptions>): Promise<string[]>;
-	/**
-	 * @hidden
-	 * @internal
-	 * @experimental
-	 */
-	importAttachments(destTagId: string, srcSpaceId: string, attachmentIds: string[]): Promise<{
-		copied: string[];
-		missing: string[];
-	}>;
 	/**
 	 * Detach [[Attachment]] from a Tag.
 	 *
@@ -4156,7 +4160,7 @@ export interface Tag {
 	 * ```
 	 *
 	 * @param tagSid The sid of the Tag to edit
-	 * @param stemOptions What to change about the Tag's stem - can include stemHeight and stemVisible
+	 * @param options What to change about the Tag's stem - can include stemHeight and stemVisible
 	 *
 	 * @embed
 	 * @bundle
@@ -4347,59 +4351,6 @@ export interface Tag {
 	 * @introduced 23.4.2
 	 */
 	toggleSharing(enable?: boolean): Promise<void>;
-}
-declare namespace Test {
-	namespace Sub {
-		/**
-		 * Call an asynchronous command with a parameter and get the same value back.
-		 * @param arg
-		 */
-		function echo(arg: string): Promise<string>;
-		/**
-		 * Call an asynchronous command with a parameter and get the same value back.
-		 * @param arg
-		 */
-		function echoAsync(arg: string): Promise<string>;
-		namespace Sub2 {
-			/**
-			 * Call an asynchronous command with a parameter and get the same value back.
-			 * @param arg
-			 */
-			function echo(arg: string): Promise<string>;
-			/**
-			 * Call an asynchronous command with a parameter and get the same value back.
-			 * @param arg
-			 */
-			function echoAsync(arg: string): Promise<string>;
-		}
-	}
-}
-interface Test {
-	/**
-	 * Call a synchronous command with a parameter and get the same value back.
-	 * @param arg
-	 */
-	echo(arg: string): Promise<string>;
-	/**
-	 * Call an asynchronous command with a parameter and get the same value back.
-	 * @param arg
-	 */
-	echoAsync(arg: string): Promise<string>;
-	/**
-	 * Get the current visibility state of Tags. Visibility can be affected by which layers are active.
-	 */
-	getTagVisibility(): Promise<Record<string, boolean>>;
-	/**
-	 * A sub-namespace that simply namespaces and sub-namespaces the functions in this interface
-	 */
-	Sub: {
-		echo: typeof Test.Sub.echo;
-		echoAsync: typeof Test.Sub.echoAsync;
-		Sub2: {
-			echo: typeof Test.Sub.Sub2.echo;
-			echoAsync: typeof Test.Sub.Sub2.echoAsync;
-		};
-	};
 }
 /**
  * Sample custom tour.
@@ -4667,6 +4618,9 @@ export declare namespace View {
 		IN_MEMORY = "layertype.inmemory",
 		OTHER = "layertype.other"
 	}
+	type CreateLayerOptions = {
+		common: boolean;
+	};
 	interface View extends IObservable<View> {
 		/** The unique id of the View */
 		get id(): string;
@@ -4813,9 +4767,7 @@ export interface View {
 	 * @param name
 	 * @param options
 	 */
-	createLayer(name: string, options?: {
-		common: boolean;
-	}): Promise<View.Layer>;
+	createLayer(name: string, options?: Partial<View.CreateLayerOptions>): Promise<View.Layer>;
 	/**
 	 * Delete a layer. The Layer will be removed from all views that it is in.
 	 *
@@ -4858,6 +4810,8 @@ declare function on(event: Tour.Event.STEPPED, callback: (activeIndex: number) =
  * ```typescript
  * const sdk: CommonMpSdk = await window.MP_SDK.connect(...);
  * ```
+ *
+ * @hidden
  */
 export type CommonMpSdk = {
 	App: App;
@@ -4880,18 +4834,23 @@ export type CommonMpSdk = {
 	Settings: Settings;
 	Sweep: Sweep;
 	Tag: Tag;
-	Test: Test;
 	Tour: Tour;
 	View: View;
 	on: typeof on;
 	off: typeof off;
 	disconnect: typeof disconnect;
 };
+/**
+ * @hidden
+ */
 export declare namespace CommonMpSdk {
 	export { Color, ConditionCallback, Dictionary, ICondition, IMapObserver, IObservable, IObservableMap, IObserver, ISubscription, ObserverCallback, Orientation, Rotation, Size, Vector2, Vector3, };
 	export { App, Asset, Camera, Conversion, Floor, Graph, Label, Link, Mattertag, Measurements, Mode, Model, OAuth, Pointer, Renderer, Room, Sensor, Settings, Sweep, Tag, Tour, View, };
 }
-type ConnectOptions = {
+/**
+ * Options to provide when connecting the sdk
+ */
+export type ConnectOptions = {
 	/** A token to provide access to a model */
 	auth: string;
 	/**
