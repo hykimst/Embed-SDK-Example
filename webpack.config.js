@@ -27,7 +27,7 @@ export default {
     exprContextCritical: false,
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts|\.tsx?$/,
         loader: "ts-loader",
         exclude: /node_modules/,
         options: {
@@ -36,7 +36,7 @@ export default {
       },
       {
         test: /@matterport[\\/]sdk[\\/]dist[\\/]index\.(umd|esm)\.js$/,
-        type: "javascript/auto",
+        type: "javascript/auto", // configuration is a specific setting used in webpack module rules. It instructs the bundler to process a file as a general JavaScript module that can use a mix of module syntaxes, including CommonJS (require), ESM (import/export), and dynamic imports. 
         use: [
           {
             loader: "string-replace-loader",
