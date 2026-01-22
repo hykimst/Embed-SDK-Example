@@ -13,9 +13,6 @@ export default {
     app: "./src/index.ts",
   },
   devtool: "source-map",
-  resolve: {
-    extensions: [".js", ".ts", ".tsx", ".d.ts"],
-  },
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
@@ -30,14 +27,31 @@ export default {
     exprContextCritical: false,
     rules: [
       {
-        test: /\.(\.d\.ts|\.tsx)$/,
+        test: /\.tsx?$/,
         loader: "ts-loader",
-        exclude: [/node_modules[\\/]/],
+        exclude: /node_modules/,
         options: {
           transpileOnly: true,
         },
       },
+      {
+        test: /@matterport[\\/]sdk[\\/]dist[\\/]index\.(umd|esm)\.js$/,
+        type: "javascript/auto",
+        use: [
+          {
+            loader: "string-replace-loader",
+            options: {
+              // Using a more global search in case the variable name changes
+              search: /import\((e|s|arguments\[0\])\)/g,
+              replace: "import(/* webpackIgnore: true */ $1)",
+            },
+          },
+        ],
+      },
     ],
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", ".json"],
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
