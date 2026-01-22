@@ -1,6 +1,6 @@
-# Embed SDK - Tutorial
+# Embed SDK - NPM@matterport/sdk Tutorial
 
-## How to fix
+## Notes webpack.config.js 
 Using webpack.config.js
 - target specific file 
 - inject the magic comment to treat import native and not dynamic
