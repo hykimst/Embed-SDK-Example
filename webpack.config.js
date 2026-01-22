@@ -1,43 +1,49 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
+// Modules; not CommonJS
+import path from "path";
+import { fileURLToPath } from "url";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import { CleanWebpackPlugin } from "clean-webpack-plugin";
 
-module.exports = {
-  mode: 'development',
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default {
+  mode: "development",
   entry: {
-    app: './index.ts',
+    app: "./src/index.ts",
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   resolve: {
-    extensions: ['.js', '.ts']
+    extensions: [".js", ".ts", ".tsx", ".d.ts"],
   },
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Development',
-      template: 'index.html',
-      inject: true
-    })
+      title: "Development",
+      template: "index.html",
+      scriptLoading: "module",
+      showErrors: true,
+      inject: true,
+    }),
   ],
   module: {
     exprContextCritical: false,
     rules: [
       {
-        test: /\.ts?$/,
-        loader: 'ts-loader',
-        exclude: [/node_modules/, /\.d\.ts$/],
+        test: /\.(\.d\.ts|\.tsx)$/,
+        loader: "ts-loader",
+        exclude: [/node_modules[\\/]/],
         options: {
-          transpileOnly: true
-        }
+          transpileOnly: true,
+        },
       },
-    ]
+    ],
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // Important for serving assets correctly
+    path: path.resolve(__dirname, "./dist"),
+    publicPath: "/", // Important for serving assets correctly
   },
   devServer: {
-    port: 8080
-  }
+    port: 8080,
+  },
 };

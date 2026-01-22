@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",    // Optional: Specifies where to put compiled .js files (e.g., in a 'dist' folder)
+    "outDir": "dist",    // Optional: Specifies where to put compiled .js files (e.g., in a 'dist' folder)
+    "declaration": true,
     // "rootDir": "/",    // Optional: Specifies where your .ts source files are (e.g., in a 'src' folder)
-    "sourceMap": true,
+    "sourceMap": true, // Debugging
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true, // Help with mixed imports
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,10 +18,11 @@
     "allowImportingTsExtensions": true,
     // "typeRoots": ["./node_modules/@types", "./node_modules/@matterport/sdk/dist/types/mp-sdk.d.ts","./node_modules/@matterport/sdk/dist/mp-sdk.d.js"], // if you put it in a 'types' folder
     "target": "esnext",    
-    "lib": ["esnext", "dom"],
-    "module": "node16",
-    "moduleResolution": "node16"
+    "lib": ["ESNext", "dom"],
+    "module": "nodenext",
+    "removeComments": false,
+    "moduleResolution": "nodenext",
   },
-  "include": ["*"],
+  "include": ["src/*.ts"],
   "exclude": ["node_modules"]
 }
