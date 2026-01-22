@@ -3,7 +3,7 @@
 ## How to fix
 Using webpack.config.js
 - target specific file 
-- inject the magic comment 
+- inject the magic comment to treat import native and not dynamic
 ```
   module: {
     exprContextCritical: false, // fixes error "Critical dependency: the request of a dependency is an expression"

@@ -4,7 +4,7 @@ import { setupSdk} from "@matterport/sdk";
 
 // Initialize SDK
 (async () => {
-  const mpSdk: MpSdk = await setupSdk("5d0im3zfdpdercus6xwbzwrba");
+  const mpSdk: MpSdk = await setupSdk("");
   console.log("[MPSDK]", mpSdk);
 })();
 
